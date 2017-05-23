@@ -1,4 +1,4 @@
-package com.example.episodicevents;
+package com.example.viewings;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
@@ -8,18 +8,33 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 
-
 /**
  * Created by trainer20 on 5/22/17.
  */
 @Configuration
-public class AmqpListener implements RabbitListenerConfigurer {
+public class ViewingsListener implements RabbitListenerConfigurer {
 
-    @RabbitListener(queues = "my-queue")
-    public void receiveMessage(final HelloMessage message) {
-        System.out.println("************************************************");
-        System.out.println(message.toString());
-        System.out.println("************************************************");
+
+    private final EventProcessingService eventProcessingService;
+
+    public ViewingsListener(EventProcessingService eventProcessingService) {
+        this.eventProcessingService = eventProcessingService;
+    }
+
+
+    @RabbitListener(queues = "episodic-progress")
+    public void receiveMessage(final EventMessage message){
+
+        try{
+            System.out.println("************************************************");
+            System.out.print(message.toString());
+            System.out.println("************************************************");
+            eventProcessingService.upsertViewing(message);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     @Bean
@@ -33,24 +48,4 @@ public class AmqpListener implements RabbitListenerConfigurer {
     public void configureRabbitListeners(final RabbitListenerEndpointRegistrar registrar) {
         registrar.setMessageHandlerMethodFactory(messageHandlerMethodFactory());
     }
-
-    public static class HelloMessage {
-        public String hello;
-
-        public String getHello() {
-            return hello;
-        }
-
-        public void setHello(String hello) {
-            this.hello = hello;
-        }
-
-        @Override
-        public String toString() {
-            return "HelloMessage{" +
-                    "hello='" + hello + '\'' +
-                    '}';
-        }
-    }
-
 }
