@@ -12,9 +12,16 @@ public class Progress extends Event {
 
     private Data data;
 
-    @Getter
-    @Setter
-    private static class Data{
+
+    public static class Data{
         int offset;
+
+        public int getOffset(){
+            return offset;
+        }
+
+        public void setOffset(int offset){
+            this.offset = offset;
+        }
     }
 }
